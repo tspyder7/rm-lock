@@ -26,8 +26,9 @@ unset _mod
 
 # Main dispatcher
 rmlock() {
-    local cmd="${1:-help}"
-    shift || true
+    local cmd="$1"
+    [[ $# -gt 0 ]] && shift
+    cmd="${cmd:-help}"
 
     case "$cmd" in
         add)     _rmlock_add    "$@" ;;
