@@ -26,7 +26,7 @@ it checks if the resolved path is listed — exact match only, no child protecti
 Download and install the `.deb` from [releases](https://github.com/tspyder7/rm-lock/releases):
 
 ```bash
-curl -fsSLO https://github.com/tspyder7/rm-lock/releases/latest/download/rm-lock_1.0.0_all.deb
+curl -fsSLO https://github.com/tspyder7/rm-lock/releases/latest/download/rm-lock_1.0.1_all.deb
 sudo dpkg -i rm-lock_1.0.0_all.deb
 source ~/.bashrc
 ```
@@ -69,7 +69,7 @@ If you want to build the `.deb` package yourself:
 gem install fpm
 
 # Build the package
-bash scripts/deb/build.sh        # creates dist/rm-lock_1.0.0_all.deb
+bash scripts/deb/build.sh        # creates dist/rm-lock_1.0.1_all.deb
 bash scripts/deb/build.sh 2.0.0  # create specific version
 
 # Install your build
