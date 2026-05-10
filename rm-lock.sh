@@ -8,7 +8,11 @@
 #   1. Overrides `rm` to check ~/.rm-lock before every deletion
 #   2. Registers the `rm-lock` command for managing the lock file
 
-RMLOCK_DIR="${RMLOCK_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+if [ -n "$BASH_SOURCE" ]; then
+    RMLOCK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+elif [ -n "$ZSH_VERSION" ]; then
+    RMLOCK_DIR="$(cd "$(dirname "${(%):-%x}")" && pwd)"
+fi
 RMLOCK_FILE="${RMLOCK_FILE:-$HOME/.rm-lock}"
 
 # Source all modules
