@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-VERSION="${1:-1.0.0}"
+VERSION="${1:-1.0.1}"
 PACKAGE_NAME="rm-lock"
 OUTPUT="dist/${PACKAGE_NAME}_${VERSION}_all.deb"
 
@@ -40,13 +40,14 @@ fpm \
   -t deb \
   -n "$PACKAGE_NAME" \
   -v "$VERSION" \
+  -p "$OUTPUT" \
   -C "$STAGEDIR" \
   --after-install scripts/deb/postinst.sh \
   --before-remove scripts/deb/prerm.sh \
   -m "rm-lock contributors" \
   -d "bash" \
   --description "Global nuke guard for rm" \
-  --homepage "https://github.com/tspyder7/rm-lock" \
+  --url "https://github.com/tspyder7/rm-lock" \
   --license "MIT" \
   .
 
