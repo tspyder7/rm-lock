@@ -23,10 +23,10 @@ it checks if the resolved path is listed — exact match only, no child protecti
 
 ### Debian / Ubuntu (recommended)
 
-Download and install the `.deb` from [releases](https://github.com/tspyder7/rm-lock/releases):
+Download and install the `.deb` from [distributions](https://github.com/tspyder7/rm-lock/dist):
 
 ```bash
-curl -fsSLO https://github.com/tspyder7/rm-lock/releases/latest/download/rm-lock_1.0.0_all.deb
+curl -fsSLO https://github.com/tspyder7/rm-lock/dist/rm-lock_1.0.0_all.deb
 sudo dpkg -i rm-lock_1.0.0_all.deb
 source ~/.bashrc
 ```
