@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-VERSION="${1:-1.0.1}"
+VERSION="${1:-1.0.2}"
 PACKAGE_NAME="rm-lock"
 OUTPUT="dist/${PACKAGE_NAME}_${VERSION}_all.deb"
 
@@ -42,6 +42,7 @@ fpm \
   -v "$VERSION" \
   -p "$OUTPUT" \
   -C "$STAGEDIR" \
+  -f \
   --after-install scripts/deb/postinst.sh \
   --before-remove scripts/deb/prerm.sh \
   -m "rm-lock contributors" \
