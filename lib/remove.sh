@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lib/edit.sh — open ~/.rm-lock in $EDITOR
+# lib/remove.sh — remove paths from ~/.rm-lock
 
 RMLOCK_FILE="${RMLOCK_FILE:-$HOME/.rm-lock}"
 
