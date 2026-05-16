@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+# lib/edit.sh — open ~/.rm-lock in $EDITOR
+
+RMLOCK_FILE="${RMLOCK_FILE:-$HOME/.rm-lock}"
+
 _rmlock_remove() {
     if [[ $# -eq 0 ]]; then
         echo "Usage: rm-lock remove <path> [path2 ...]" >&2
