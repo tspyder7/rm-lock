@@ -6,8 +6,9 @@ A global nuke guard for `rm`. Prevents accidental `rm -rf` on paths you care abo
 
 ## How it works
 
-One global file at `~/.rm-lock`. Each line is an absolute path. When you run `rm`,
-it checks if the resolved path is listed — exact match only, no child protection.
+One global file at `~/.rm-lock`. Each line is a path. When you run `rm`,
+it checks if the target exactly matches a listed path — no partial or child protection.
+Paths are stored as-is (no symlink resolution).
 
 ```
 ~/.rm-lock
@@ -26,19 +27,20 @@ it checks if the resolved path is listed — exact match only, no child protecti
 Download and install the `.deb` from [releases](https://github.com/tspyder7/rm-lock/releases):
 
 ```bash
-curl -fsSLO https://github.com/tspyder7/rm-lock/releases/latest/download/rm-lock_1.0.1_all.deb
-sudo dpkg -i rm-lock_1.0.0_all.deb
-source ~/.bashrc
+curl -fsSLO https://github.com/tspyder7/rm-lock/releases/latest/download/rm-lock_1.0.2_all.deb
+sudo dpkg -i rm-lock_1.0.2_all.deb
+source /etc/profile
 ```
 
 **Uninstall:**
 ```bash
 sudo dpkg -r rm-lock
 ```
+Open a new shell or run `source /etc/profile` to fully unload the shell functions.
 
 The `.deb` package will:
 - Install to `/usr/local/lib/rm-lock`
-- Automatically patch `~/.bashrc` and `~/.zshrc` with the sourcing line
+- Create `/etc/profile.d/rm-lock.sh` for shell-wide integration
 - Preserve your `~/.rm-lock` file on uninstall
 
 ### From source (development)
@@ -47,13 +49,14 @@ The `.deb` package will:
 git clone https://github.com/tspyder7/rm-lock.git
 cd rm-lock
 make install        # installs to ~/.local/lib/rm-lock
-source ~/.bashrc
+source /etc/profile
 ```
 
 **Uninstall:**
 ```bash
 bash scripts/install/uninstall.sh   # removes installation, keeps ~/.rm-lock
 ```
+Open a new shell or run `source /etc/profile` to fully unload the shell functions.
 
 Custom install path:
 ```bash
@@ -69,7 +72,7 @@ If you want to build the `.deb` package yourself:
 gem install fpm
 
 # Build the package
-bash scripts/deb/build.sh        # creates dist/rm-lock_1.0.1_all.deb
+bash scripts/deb/build.sh        # creates dist/rm-lock_1.0.2_all.deb
 bash scripts/deb/build.sh 2.0.0  # create specific version
 
 # Install your build
@@ -119,7 +122,8 @@ rm-lock/
 │   ├── remove.sh     # rm-lock remove
 │   ├── list.sh       # rm-lock list
 │   ├── status.sh     # rm-lock status
-│   └── edit.sh       # rm-lock edit
+│   ├── edit.sh       # rm-lock edit
+│   └── help.sh       # rm-lock help
 ├── scripts/
 │   ├── install/
 │   │   ├── install.sh        # install to ~/.local/lib/rm-lock
@@ -162,4 +166,5 @@ export RMLOCK_FILE=/custom/path/.rm-lock
 - Interactive shell only — scripts and CI bypass the `rm` override automatically
   (checked via `$-` containing `i`)
 - Exact match only — subdirectories and parent directories are not blocked
+- Paths are stored as-is (no `realpath` resolution) — matching is literal
 - Hardlinks and bind mounts are not detected — this is a convenience guard, not a security boundary

@@ -26,4 +26,4 @@ deb: scripts/deb/build.sh
 	@bash scripts/deb/build.sh
 
 test:
-	@bash test.sh
+	@bash tests/test.sh

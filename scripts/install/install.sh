@@ -4,13 +4,14 @@
 set -euo pipefail
 
 INSTALL_DIR="${1:-$HOME/.local/lib/rm-lock}"
-SHELL_CONFIGS=()
+PROFILED_FILE="/etc/profile.d/rm-lock.sh"
 
-# Detect shell config files
-[[ -f "$HOME/.bashrc" ]] && SHELL_CONFIGS+=("$HOME/.bashrc")
-[[ -f "$HOME/.zshrc"  ]] && SHELL_CONFIGS+=("$HOME/.zshrc")
+# ── check if already installed ──────────────────────────────────────────────
 
-SOURCE_LINE="source \"$INSTALL_DIR/rm-lock.sh\"  # rm-lock"
+if [[ -d "$INSTALL_DIR" ]] && [[ -f "$PROFILED_FILE" ]]; then
+    echo "rm-lock is already installed at $INSTALL_DIR"
+    exit 0
+fi
 
 # ── install files ──────────────────────────────────────────────────────────
 
@@ -24,25 +25,33 @@ cp lib/remove.sh     "$INSTALL_DIR/lib/remove.sh"
 cp lib/list.sh       "$INSTALL_DIR/lib/list.sh"
 cp lib/status.sh     "$INSTALL_DIR/lib/status.sh"
 cp lib/edit.sh       "$INSTALL_DIR/lib/edit.sh"
+cp lib/help.sh       "$INSTALL_DIR/lib/help.sh"
 
 echo "  ✓ files copied"
 
-# ── add source line to shell configs ───────────────────────────────────────
+# ── configure shell integration ────────────────────────────────────────────
 
-for cfg in "${SHELL_CONFIGS[@]}"; do
-    if grep -qF "rm-lock" "$cfg" 2>/dev/null; then
-        echo "  ✓ $cfg already configured"
-    else
-        printf '\n%s\n' "$SOURCE_LINE" >> "$cfg"
-        echo "  ✓ added source line to $cfg"
-    fi
-done
+echo "Configuring rm-lock shell integration..."
+
+sudo bash -c "cat > \"$PROFILED_FILE\" <<'EOF'
+#!/bin/sh
+
+if [ -f \"$INSTALL_DIR/rm-lock.sh\" ]; then
+    . \"$INSTALL_DIR/rm-lock.sh\"
+fi
+EOF"
+
+sudo chmod 755 "$PROFILED_FILE"
+
+echo "  ✓ created $PROFILED_FILE"
 
 # ── done ───────────────────────────────────────────────────────────────────
 
 echo
-echo "Done! Reload your shell or run:"
-echo "  source $INSTALL_DIR/rm-lock.sh"
+echo "✓ rm-lock installed successfully"
+echo
+echo "Open a new shell or run:"
+echo "  source /etc/profile"
 echo
 echo "Then protect paths with:"
 echo "  rm-lock add ~/important/data"

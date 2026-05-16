@@ -1,18 +1,21 @@
 #!/bin/bash
-# DEB pre-remove script — clean up shell configurations
-# Keeps ~/.rm-lock file intact
+# DEB pre-remove script
 
-set -e
+utility_cleanup() {
+    utils=("add" "check" "edit" "help" "list" "remove" "status")
 
-echo "Cleaning up shell configurations..."
+    for util in "{$utils[@]}"; do
+        unset -f "_rmlock_$util";
+    done
+}
 
-# Remove sourcing lines from shell configs
-for rc in ~/.bashrc ~/.zshrc; do
-    [[ ! -f "$rc" ]] && continue
-    if grep -qF "rm-lock" "$rc" 2>/dev/null; then
-        sed -i.bak '/rm-lock/d' "$rc"
-        echo "  ✓ cleaned $rc (backup: ${rc}.bak)"
-    fi
-done
+cleanup() {
+    PROFILED_FILE="/etc/profile.d/rm-lock.sh"
+    rm -f "$PROFILED_FILE"
+    unset -f "rm-lock"
+    utility_cleanup
 
-echo "Shell configs cleaned. Lock file preserved at ~/.rm-lock"
+    echo "rm-lock uninstalled"
+}
+
+cleanup

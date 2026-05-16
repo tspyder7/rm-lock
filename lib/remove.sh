@@ -10,20 +10,25 @@ _rmlock_remove() {
     fi
 
     [[ ! -f "$RMLOCK_FILE" ]] && {
-        echo "rm-lock remove: no lock file found at $RMLOCK_FILE" >&2
+        echo "[rm-lock] No lock file found at $RMLOCK_FILE" >&2
         return 1
     }
 
-    local arg path tmp
-    for arg in "$@"; do
-        path=$(realpath -- "$arg" 2>/dev/null) || path="$arg"
+    local MKTEMP_BIN arg path tmp
+    MKTEMP_BIN=$(command -p mktemp) || { echo "mktemp not found" >&2; return 1; }
 
-        if grep -qxF "$path" "$RMLOCK_FILE" 2>/dev/null; then
-            tmp=$(grep -vxF "$path" "$RMLOCK_FILE")
-            printf '%s\n' "$tmp" > "$RMLOCK_FILE"
-            printf 'rm-lock remove: unprotected: %s\n' "$path"
+    for arg in "$@"; do
+        # Resolve . to current directory
+        path=$([[ "$arg" == "." ]] && pwd || echo "$arg")
+
+        if command -p grep -qxF -- "$path" "$RMLOCK_FILE"; then
+            tmp=$MKTEMP_BIN
+            echo "$(command -p grep -vxF -- "$path" "$RMLOCK_FILE")" > "$tmp"
+
+            command -p mv -- "$tmp" "$RMLOCK_FILE"
+            printf '[rm-lock] Removed lock: %s\n' "$path"
         else
-            printf 'rm-lock remove: not found: %s\n' "$path" >&2
+            printf '[rm-lock] Not found: %s\n' "$path" >&2
         fi
     done
 }

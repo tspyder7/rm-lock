@@ -5,9 +5,31 @@
 set -euo pipefail
 
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/lib/rm-lock}"
+PROFILED_FILE="/etc/profile.d/rm-lock.sh"
 
 echo "Uninstalling rm-lock..."
 echo
+
+# ── remove profile.d configuration ─────────────────────────────────────────
+
+if [[ -f "$PROFILED_FILE" ]]; then
+    sudo rm -f "$PROFILED_FILE"
+    echo "✓ Removed $PROFILED_FILE"
+else
+    echo "  (not found: $PROFILED_FILE)"
+fi
+
+# ── unset functions ───────────────────────────────────────────────────────
+
+utils=("add" "check" "edit" "help" "list" "remove" "status")
+
+for util in "${utils[@]}"; do
+    unset -f "_rmlock_$util" 2>/dev/null || true
+done
+
+unset -f "rm-lock" 2>/dev/null || true
+
+echo "✓ Functions unset"
 
 # ── remove installation directory ──────────────────────────────────────────
 
@@ -17,16 +39,6 @@ if [[ -d "$INSTALL_DIR" ]]; then
 else
     echo "  (not found: $INSTALL_DIR)"
 fi
-
-# ── clean shell configs ────────────────────────────────────────────────────
-
-for rc in ~/.bashrc ~/.zshrc; do
-    [[ ! -f "$rc" ]] && continue
-    if grep -qF "rm-lock" "$rc" 2>/dev/null; then
-        sed -i.bak '/rm-lock/d' "$rc"
-        echo "✓ Cleaned $rc (backup: ${rc}.bak)"
-    fi
-done
 
 # ── note about lock file ───────────────────────────────────────────────────
 
