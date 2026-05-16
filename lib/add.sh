@@ -9,17 +9,18 @@ _rmlock_add() {
         return 1
     fi
 
-    touch "$RMLOCK_FILE"
+    if ! touch "$RMLOCK_FILE"; then
+        echo "rm-lock add: cannot write to $RMLOCK_FILE" >&2
+        return 1
+    fi
 
     local arg path
-    for arg in "$@"; do
-        # Resolve to absolute path; reject if it doesn't exist
-        path=$(realpath -- "$arg" 2>/dev/null) || {
-            printf 'rm-lock add: path not found: %s\n' "$arg" >&2
-            continue
-        }
 
-        if grep -qxF "$path" "$RMLOCK_FILE" 2>/dev/null; then
+    for arg in "$@"; do
+        # Resolve . to current directory
+        path=$([[ "$arg" == "." ]] && pwd || echo "$arg")
+
+        if grep -qxF -- "$path" "$RMLOCK_FILE" 2>/dev/null; then
             printf 'rm-lock add: already protected: %s\n' "$path"
         else
             printf '%s\n' "$path" >> "$RMLOCK_FILE"
