@@ -10,7 +10,7 @@ _rmlock_add() {
     fi
 
     if ! touch "$RMLOCK_FILE"; then
-        echo "rm-lock add: cannot write to $RMLOCK_FILE" >&2
+        echo "[rm-lock] Cannot write to $RMLOCK_FILE" >&2
         return 1
     fi
 
@@ -21,10 +21,10 @@ _rmlock_add() {
         path=$([[ "$arg" == "." ]] && pwd || echo "$arg")
 
         if grep -qxF -- "$path" "$RMLOCK_FILE" 2>/dev/null; then
-            printf 'rm-lock add: already protected: %s\n' "$path"
+            printf '[rm-lock] Already protected: %s\n' "$path"
         else
             printf '%s\n' "$path" >> "$RMLOCK_FILE"
-            printf 'rm-lock add: protected: %s\n' "$path"
+            printf '[rm-lock] Added rm protection: %s\n' "$path"
         fi
     done
 }

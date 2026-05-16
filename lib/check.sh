@@ -27,7 +27,7 @@ rm() {
             [[ -z "$protected" ]] && continue
 
             if [[ "$target" == "$protected" ]]; then
-                printf 'rm: "%s" is protected by %s\n' "$arg" "$RMLOCK_FILE" >&2
+                printf '[rm-lock]: "%s" is protected by %s\n' "$arg" "$RMLOCK_FILE" >&2
                 violations=1
                 break
             fi

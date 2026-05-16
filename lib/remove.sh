@@ -5,7 +5,7 @@ _rmlock_remove() {
     fi
 
     [[ ! -f "$RMLOCK_FILE" ]] && {
-        echo "[rm-lock remove] No lock file found at $RMLOCK_FILE" >&2
+        echo "[rm-lock] No lock file found at $RMLOCK_FILE" >&2
         return 1
     }
 
@@ -21,9 +21,9 @@ _rmlock_remove() {
             echo "$(command -p grep -vxF -- "$path" "$RMLOCK_FILE")" > "$tmp"
 
             command -p mv -- "$tmp" "$RMLOCK_FILE"
-            printf '[rm-lock remove] Removed lock: %s\n' "$path"
+            printf '[rm-lock] Removed lock: %s\n' "$path"
         else
-            printf '[rm-lock remove] Not found: %s\n' "$path" >&2
+            printf '[rm-lock] Not found: %s\n' "$path" >&2
         fi
     done
 }

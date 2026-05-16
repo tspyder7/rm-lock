@@ -17,7 +17,7 @@ log_success() {
 
 _rmlock_list() {
     if [[ ! -f "$RMLOCK_FILE" ]]; then
-        echo "rm-lock: no lock file at $RMLOCK_FILE (nothing protected)"
+        echo "[rm-lock] No lock file at $RMLOCK_FILE (nothing protected)"
         return 0
     fi
 
@@ -47,6 +47,6 @@ _rmlock_list() {
     done < "$RMLOCK_FILE"
 
     if [[ $entries -eq 0 ]]; then
-        echo "rm-lock: lock file exists but has no entries"
+        echo "[rm-lock] Lock file exists but has no entries"
     fi
 }
