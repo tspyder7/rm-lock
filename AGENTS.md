@@ -6,48 +6,55 @@ Pure-bash accidental deletion protection system. Zero dependencies.
 
 | File | Role |
 |------|------|
-| `scripts/rm-lock-lib.sh` | Core library — `rm_lock_enable()`, `rm_lock_check_arg()`, etc. |
-| `scripts/rm-lock-utils.sh` | CLI utilities — `rm_lock_init()`, `rm_lock_add()`, etc. |
-| `install.sh` | Installer — copies files, creates CLI dispatcher, updates shell config |
-| `Makefile` | Optional automation wrapper around `install.sh` |
+| `rm-lock.sh` | Entry point — sources all lib modules, registers `rm-lock` CLI and `rm()` override |
+| `lib/*.sh` | Module scripts — `check.sh`, `add.sh`, `remove.sh`, `list.sh`, `status.sh`, `edit.sh`, `help.sh` |
+| `scripts/install/install.sh` | Installer — copies files to target dir, creates `/etc/profile.d/rm-lock.sh` |
+| `Makefile` | Optional automation wrapper around install/uninstall/test |
+| `tests/test.sh` | Test suite |
 
 ## How protection works
 
-`rm_lock_enable()` defines a bash function `rm()` that shadows `/bin/rm`. In interactive shells only (`[[ $- != *i* ]]`), it walks the directory tree upward for `.rm-lock` files and blocks deletion of exact directory matches. Non-exact matches (contents, subdirs, files) pass through.
+`rm-lock.sh` sources `lib/check.sh` which defines a bash function `rm()` that shadows `/bin/rm`. In interactive shells only (`[[ $- != *i* ]]`), it checks `~/.rm-lock` (or `$RMLOCK_FILE`) for an exact match of the target path. Non-exact matches (subdirs, contained files, parents) pass through.
 
 ## Commands
 
 ### Installation (run from repo root)
 ```
-bash install.sh                          # install
-bash install.sh install --prefix ~/.config/rm-lock  # custom path
-bash install.sh uninstall                # clean removal
-bash install.sh status                   # verify installation
-make install                             # same, via Makefile
-make install PREFIX=~/.config/rm-lock    # custom path via make
+make install                             # install to ~/.local/lib/rm-lock
+make install INSTALL_DIR=/custom/path    # custom path
+bash scripts/install/install.sh          # same, via script directly
+make uninstall                           # clean removal
+bash scripts/install/uninstall.sh        # same, via script
 ```
 
-### After install (reload shell first: `source ~/.bashrc`)
+### After install (open new shell or `source /etc/profile`)
 ```
-rm-lock init data cache models           # create .rm-lock
-rm-lock add results                      # add dirs to protection
-rm-lock remove cache                     # remove from protection
-rm-lock list                             # show protected dirs
-rm-lock status                           # show all protection (walks up tree)
-rm-lock verify                           # check .rm-lock integrity
-rm-lock disable                          # temporarily disable
-rm-lock enable                           # re-enable
+rm-lock add ~/projects/data              # protect a path
+rm-lock add ~/data ~/models              # protect multiple paths
+rm-lock remove ~/projects/old            # remove from protection
+rm-lock list                             # show all protected paths
+rm-lock status                           # show lock file info
+rm-lock edit                             # open ~/.rm-lock in $EDITOR
 ```
 
 ## Testing
 
-No test file exists in the repo (`test-rm-lock.sh` referenced in docs is absent). `make test` will fail.
+```
+make test
+```
+
+Or directly:
+```
+bash tests/test.sh
+```
 
 ## Notable quirks
 
-- **Test suite missing** — `test-rm-lock.sh` and `MODULAR_SETUP.md` are referenced in docs but not present.
-- **Install modifies user shell config** — `install.sh` appends sourcing lines to `~/.bashrc` and `~/.zshrc`. Always warn an agent about this side effect.
-- **Protection is interactive-shell only** — scripts bypass the `rm` override.
-- **Path resolution** uses `realpath` first, falls back to `readlink -f`.
-- **Custom prefix** set via `RM_LOCK_PREFIX` env var or `--prefix` flag.
+- **Install creates `/etc/profile.d/rm-lock.sh`** — requires `sudo` for system-wide shell integration.
+- **Test suite exists** at `tests/test.sh` — runs via `make test` or `bash tests/test.sh`.
+- **Protection is interactive-shell only** — scripts and CI bypass the `rm` override (checked via `$-` containing `i`).
+- **Exact match only** — only the literal path in the lock file is blocked; subdirectories, children, and parents pass through.
+- **Paths stored as-is** — no `realpath` resolution; matching is literal; symlinks, hardlinks, and bind mounts not detected.
+- **Lock file path** overridden via `RMLOCK_FILE` env var (defaults to `~/.rm-lock`).
+- **Install dir** set via `INSTALL_DIR` arg to `make` or `install.sh` (defaults to `~/.local/lib/rm-lock`).
 - **Two branches**: `main` (stable) and `feat/rm-lock-shell` (feature work in progress).
