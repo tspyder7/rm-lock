@@ -5,7 +5,8 @@ export RMLOCK_FILE=$(mktemp)
 TESTDIR=$(mktemp -d)
 PASS=0; FAIL=0
 
-RMLOCK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RMLOCK_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$RMLOCK_DIR/rm-lock.sh"
 
 cleanup() { rm -f "$RMLOCK_FILE"; command rm -rf "$TESTDIR"; }
